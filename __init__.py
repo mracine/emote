@@ -1,0 +1,2 @@
+from .emote import Emote
+
