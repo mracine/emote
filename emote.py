@@ -14,11 +14,15 @@ class Emote(HalModule):
 		if self.path is not None:
 			try:
 				if not os.path.isfile(self.path):
-					open(self.path, 'w+')
+					with open(self.path, 'w+') as f:
+						json.dump(self.emotes, f)
 
 				else:
-					self.emotes = json.loads(open(self.path, 'r').read())
+					with open(self.path, 'r') as f:
+						self.emotes = json.loads(f.read())
 
+			except (ValueError):
+				self.log.error('Couldn\'t parse JSON: ', file=sys.stderr)
 			except (IOError, OSError):
 				self.log.error('Couldn\'t open emotes file: ', file=sys.stderr)
 
@@ -37,7 +41,9 @@ class Emote(HalModule):
 		else:
 			self.emotes[args[0]].append(args[1])
 
-		json.dump(self.emotes, open(self.path, 'w'))
+		with open(self.path, 'w') as f:
+			json.dump(self.emotes, f)
+
 		return 'Emote "' + args[0] + '" added :)'
 
 	def emotedel(self, emote):
@@ -45,7 +51,10 @@ class Emote(HalModule):
 			return 'One cannot simply delete Lenny ( ͡° ͜ʖ ͡°)'
 		elif emote in self.emotes:
 			del self.emotes[emote]
-			json.dump(self.emotes, open(self.path, 'w'))
+
+			with open(self.path, 'w') as f:
+				json.dump(self.emotes, f)
+
 			return 'You strike down the legendary "' + emote + '" with your mighty sword.'
 		else:
 			return 'You swing your sword but strike only the wind.'
