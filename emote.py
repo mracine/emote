@@ -7,24 +7,25 @@ class Emote(HalModule):
 	def init(self):
 		# Emotes are of type <string, string[]>
 		self.emotes = {}
-		self.path = self.config.get('emotes-path')
+
+		if self.path is None:
+			self.path = 'emotes.txt'
 
 		self.log.info('using emotes path: ' + self.path)
 
-		if self.path is not None:
-			try:
-				if not os.path.isfile(self.path):
-					with open(self.path, 'w+') as f:
-						json.dump(self.emotes, f)
+		try:
+			if not os.path.isfile(self.path):
+				with open(self.path, 'w+') as f:
+					json.dump(self.emotes, f)
 
-				else:
-					with open(self.path, 'r') as f:
-						self.emotes = json.loads(f.read())
+			else:
+				with open(self.path, 'r') as f:
+					self.emotes = json.loads(f.read())
 
-			except (ValueError):
-				self.log.error('Couldn\'t parse JSON: ', file=sys.stderr)
-			except (IOError, OSError):
-				self.log.error('Couldn\'t open emotes file: ', file=sys.stderr)
+		except (ValueError):
+			self.log.error('Couldn\'t parse JSON: ', file=sys.stderr)
+		except (IOError, OSError):
+			self.log.error('Couldn\'t open emotes file: ', file=sys.stderr)
 
 
 	def emote(self, pattern=""):
@@ -46,10 +47,14 @@ class Emote(HalModule):
 
 		return 'Emote "' + args[0] + '" added :)'
 
+	def emotelist(self):
+		if len(self.emotes) < 1:
+			return 'No emotes currently stored :('
+		else:
+			return 'Emotes: ' + ', '.join(list(self.emotes.keys()))
+
 	def emotedel(self, emote):
-		if emote == 'lenny':
-			return 'One cannot simply delete Lenny ( ͡° ͜ʖ ͡°)'
-		elif emote in self.emotes:
+		if emote in self.emotes:
 			del self.emotes[emote]
 
 			with open(self.path, 'w') as f:
@@ -68,6 +73,8 @@ class Emote(HalModule):
 			self.reply(msg, body='( ͡° ͜ʖ ͡°)')
 		elif cmd == '!emoteadd':
 			self.reply(msg, body=self.emoteadd(arg))
+		elif cmd == '!emotelist':
+			self.reply(msg, body=self.emotelist())
 		elif cmd == '!emotedel':
 			self.reply(msg, body=self.emotedel(arg))
 		elif cmd == '!emote':
