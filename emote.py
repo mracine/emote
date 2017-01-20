@@ -8,8 +8,13 @@ class Emote(HalModule):
 		# Emotes are of type <string, string[]>
 		self.emotes = {}
 
+		self.path = self.config.get('emote-path')
 		if self.path is None:
-			self.path = 'emotes.txt'
+			self.path = 'emotes.json'
+
+		self.type = self.config.get('emote-type')
+		if self.type is None:
+			self.type = 'random'
 
 		self.log.info('using emotes path: ' + self.path)
 
@@ -32,7 +37,12 @@ class Emote(HalModule):
 		if pattern not in self.emotes:
 			return 'Emote not found :('
 		else:
-			return random.choice(self.emotes[pattern])
+			if self.type == 'random':
+				return random.choice(self.emotes[pattern])
+			elif self.type == 'queue':
+				retEmote = self.emotes[pattern].pop()
+				self.emotes[pattern].insert(0, retEmote)
+				return retEmote
 
 	def emoteadd(self, emote):
 		args = emote.split(' ', 1)
