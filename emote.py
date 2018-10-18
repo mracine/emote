@@ -4,6 +4,8 @@ from halibot import HalModule
 
 class Emote(HalModule):
 
+	HAL_MINIMUM = "0.2.0"
+
 	def init(self):
 		# Emotes are of type <string, string[]>
 		self.emotes = {}
